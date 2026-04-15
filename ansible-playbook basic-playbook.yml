@@ -1,7 +1,7 @@
 ---
 - name: Common setup for all servers
   hosts: all
-  become: true  # equivale a usar sudo
+  become: true  
 
   tasks:
     - name: Update apt packages
