@@ -1,0 +1,94 @@
+---
+- name: Teardown webservers
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Stop Nginx
+      service:
+        name: nginx
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove Nginx
+      apt:
+        name: nginx
+        state: absent
+        purge: yes
+
+    - name: Remove index.html
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: Remove HTTP and HTTPS firewall rules
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+        delete: yes
+      loop:
+        - "80"
+        - "443"
+      ignore_errors: yes
+
+- name: Teardown database server
+  hosts: debservers
+  become: true
+
+  tasks:
+    - name: Stop MySQL
+      service:
+        name: mysql
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Remove MySQL
+      apt:
+        name:
+          - mysql-server
+          - python3-mysqldb
+        state: absent
+        purge: yes
+
+    - name: Remove MySQL data directory
+      file:
+        path: /var/lib/mysql
+        state: absent
+
+    - name: Remove MySQL firewall rules
+      ufw:
+        rule: allow
+        port: "3306"
+        proto: tcp
+        src: "{{ item }}"
+        delete: yes
+      loop:
+        - "54.197.5.91"   
+        - "54.167.85.45"  
+      ignore_errors: yes
+
+- name: Common teardown for all servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Remove common packages
+      apt:
+        name:
+          - curl
+          - vim
+          - git
+          - ufw
+        state: absent
+        purge: yes
+
+    - name: Remove unused dependencies
+      apt:
+        autoremove: yes
+
+    - name: Clean apt cache
+      apt:
+        autoclean: yes
