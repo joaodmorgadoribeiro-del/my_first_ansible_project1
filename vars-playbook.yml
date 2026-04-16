@@ -1,0 +1,63 @@
+- name: Deploy webservers and database server
+  hosts: all
+  become: true
+
+  vars_files:
+     - vars/common_templates.yml
+     - vars/secrets.yml
+
+  vars:
+    app_name: app_name
+    app_port: 8080
+    app_dirs:
+      - /var/www/app_name
+      - /var/log/app_name
+    db:
+      host: db.example.com
+      port: 5432
+      name: myapp_db
+
+  tasks:
+    - name: show app name
+      debug:
+        msg: "App: {{ app_name }} on port {{ app_port }} by {{ student }}"
+
+    - name: show db host (dot notation)
+      debug:
+        msg: "DB {{ db.host }}:{{ db.port }}"
+
+    - name: show db host (bracket notation)
+      debug:
+        msg: "DB {{ db['host'] }}"
+
+    - name: Connect to DB
+      debug:
+        msg: "Using DB password: {{ db_password }}"
+
+    - name: Show OS info
+      debug:
+        msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Show primary IP
+      debug:
+        msg: "IP: {{ ansible_default_ipv4.address }}"
+
+    - name: show total RAM in MB
+      debug:
+        msg: "RAM: {{ ansible_memtotal_mb }} MB"
+
+    - name: Render the notes files
+      template:
+        src: ./templates/notes.j2
+        dest: /home/ubuntu/notes.txt
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+- name: Print server Engine
+  hosts: webservers
+
+  tasks:
+    - name: Show Nginx version
+      debug:
+        msg: "Engine running: {{ server_engine }}"

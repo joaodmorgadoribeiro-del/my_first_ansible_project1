@@ -1,0 +1,11 @@
+{{ student }} is learning Ansible and has created a playbook called {{ app_name }}. The playbook is designed to configure web servers and includes tasks such as pinging the servers to check connectivity. The inventory file has been updated with new host information for the web servers and database server. Additionally, common templates and secrets have been defined in separate YAML files for better organization and security.
+
+This is running on {{ ansible_host }}
+
+{% for dir in app_dirs %}
+Folder: {{ dir }}
+{% endfor %}
+
+{% if db.host is defined and db.host %}
+Host for the db: {{ db.host }}
+{% endif %}
