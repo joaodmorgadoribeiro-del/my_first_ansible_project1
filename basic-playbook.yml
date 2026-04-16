@@ -1,7 +1,7 @@
 ---
 - name: Common setup for all servers
   hosts: all
-  become: true  # equivale a usar sudo
+  become: true  
 
   tasks:
     - name: Update apt packages
@@ -73,5 +73,10 @@
         proto: tcp
         src: "{{ item }}"
       loop:
+<<<<<<< HEAD:basic-playbook.yml
         - "34.202.236.150"   # web01
         - "54.159.252.173"  # web02
+=======
+        - "54.197.5.91"   # web01
+        - "54.167.85.45"  # web02
+>>>>>>> 74c66e065c23d3454a93515a1847361791d3ed64:ansible-playbook basic-playbook.yml
