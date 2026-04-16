@@ -1,0 +1,77 @@
+---
+- name: Common setup for all servers
+  hosts: all
+  become: true  
+
+  tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install common packages
+      apt:
+        name:
+          - curl
+          - vim
+          - git
+          - ufw
+        state: present
+
+- name: Setup webservers
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Allow HTTP and HTTPS on firewall
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "80"
+        - "443"
+
+    - name: Deploy index.html
+      copy:
+        content: "<h1>Hello from {{ inventory_hostname }}</h1>"
+        dest: /var/www/html/index.html
+
+- name: Setup database server
+  hosts: debservers
+  become: true
+
+  tasks:
+    - name: Install MySQL
+      apt:
+        name:
+          - mysql-server
+          - python3-mysqldb  
+        state: present
+
+    - name: Start and enable MySQL
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Allow MySQL port only from webservers
+      ufw:
+        rule: allow
+        port: "3306"
+        proto: tcp
+        src: "{{ item }}"
+      loop:
+        - "34.202.236.150"   # web01
+        - "54.159.252.173"  # web02
